@@ -84,7 +84,6 @@ contract Voting is Ownable {
 
     function _castVote(uint256 _projectID) private {
         uint256 freeVoteCount = voterDetails[msg.sender].freeVoteCount;
-        voterDetails[msg.sender].freeVoteCount += 1;
         voterDetails[msg.sender].totalVotes += 1;
         projectDetails[_projectID].totalVotes += 1;
 
@@ -95,6 +94,7 @@ contract Voting is Ownable {
                 voterDetails[msg.sender].freeVoteTimestamp + 30 days <
                 block.timestamp
             ) {
+                voterDetails[msg.sender].freeVoteCount = 0;
                 voterDetails[msg.sender].freeVoteTimestamp = block.timestamp;
             } else if (
                 voterDetails[msg.sender].freeVoteTimestamp + 30 days >=
@@ -104,12 +104,13 @@ contract Voting is Ownable {
                 USDT.transferFrom(msg.sender, address(this), TOKEN_FEES);
             }
         }
-
+        voterDetails[msg.sender].freeVoteCount += 1;
+        voterDetails[msg.sender].voter = msg.sender;
         projectDetails[_projectID].hasVoted[msg.sender] = true;
         projectDetails[_projectID].voteDetails[msg.sender].voter = msg.sender;
         projectDetails[_projectID].voteDetails[msg.sender].date = block
             .timestamp;
-        voterDetails[msg.sender].voter = msg.sender;
+
         emit voteCasted(msg.sender, _projectID, block.timestamp);
     }
 
